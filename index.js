@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
 
 const formRoute = require('./routes/FormCreateRoute'); //route for form data
-
+const participantsrouter = require('./routes/Participant'); //route for participants
 
 const app = express();
 app.use(express.json());
@@ -21,6 +21,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // call the route 
 app.use("/",formRoute);
+app.use('/participant',participantsrouter);
 
 app.listen(PORT, ()=>console.log('Server Connected',PORT));
 
