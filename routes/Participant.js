@@ -18,13 +18,28 @@ const upload = multer({ storage:storage });
 
 router.post('/saveParticipant', upload.any(), async (req, res) => {
     try {
-        // res.json(req.file);
-        // const formfields = req.body;
-        // const file = req.file;
-        const participantdata = req.body
-        const form_id = req.body.dynamicFields.form_id;
+       
+        const dynamicFields = JSON.parse(req.body.dynamicFields);
+        const participantdata = dynamicFields.participantdata;
+        const form_id = dynamicFields.form_id;
+        // const form_id = req.body.dynamicFields.form_id;
         const files = req.files;
+     
+        // to create the object of the model and store these data to mongodb server
+        const newParticipantData = new Participant({
+            
+            dynamicFields:{
+                userData:participantdata,
+                form_id:form_id,
+                files: files.map(file=>({filename:file.filename , path:file.path}))
+            }
 
+        })
+
+        // save data to  mongo 
+        await newParticipantData.save();
+      
+        console.log('DynamicField Data:', dynamicFields);
         console.log('Participant Data:', participantdata);
         console.log('Form ID:', form_id);
         console.log('Files:', files);
