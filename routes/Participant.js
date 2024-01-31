@@ -3,6 +3,7 @@ const router = express.Router();
 const Participant = require('../model/Participant');
 const multer = require('multer');
 const path = require('path'); // Add this line to include the 'path' module
+const {ChildForm} = require('../model/FormCreation');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -25,6 +26,11 @@ router.post('/saveParticipant', upload.any(), async (req, res) => {
         // const form_id = req.body.dynamicFields.form_id;
         const files = req.files;
      
+         // fetch the whole widget data based on the formid for proper validation
+         const childForms = await FetchtheWidgets(form_id);
+        
+        //  validate the data
+        validateTheFormData(participantdata,childForms);
         // to create the object of the model and store these data to mongodb server
         const newParticipantData = new Participant({
             
@@ -35,7 +41,7 @@ router.post('/saveParticipant', upload.any(), async (req, res) => {
             }
 
         })
-
+       
         // save data to  mongo 
         await newParticipantData.save();
       
@@ -46,8 +52,97 @@ router.post('/saveParticipant', upload.any(), async (req, res) => {
         // res.send('Upload Successfully');
         res.status(200).json({ message: 'Data and files received successfully.' });
     } catch (error) {
+       if(error.message === 'ValidationError'){
+        res.status(422).json({validationError:error.message});
+       }
+       else{
         res.status(500).json({ error: error.message });
+       }
+      
     }
 });
+
+
+// fetch the widget data from the schema based on the form_id
+const FetchtheWidgets=async(form_id)=>{
+    try{
+        const childform = await ChildForm.find({foreignKey:form_id});
+        console.log("widgetdata",childform);
+        return childform;
+    }
+    catch(error){
+        console.log("Error in Fetching Widgets",error);
+        throw error
+    }
+};
+
+// validate the formdata
+const validateTheFormData=(participantdata,childforms)=>{
+    childforms.forEach((childform)=>{
+        const {name,type} = childform;
+        const value = participantdata[name];
+        console.log("$$$$$value",value,name);
+
+    switch(type){
+        case 'email':
+            if(!isValidateEmail(value)){
+                throw new Error(`Invalid email for field:${name}`);
+            }
+            break;
+        case 'mobile':
+            if(!isValidMObile(value)){
+                throw new Error(`Invalid mobile number for field:${name}`);
+            }
+            break;
+        case 'number':
+            if(!isValidNumber(value)){
+                throw new Error('Invalid Numeric value');
+            }
+            break;
+        case 'text':
+            if(!isValidText(value)){
+                throw new Error(`Invalid Text for field ${name}`);
+            }
+    }
+    })
+}
+
+const isValidateEmail=(email)=>{
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+const isValidMObile=(mobile)=>{
+    const mobileRegex = /^\d{10}$/;
+    return mobileRegex.test(mobile);
+}
+
+const isValidNumber=(text)=>{
+    const numericRegex = /^[0-9]+$/;
+    return numericRegex.test(text);
+}
+
+const isValidText = (text) => {
+    // Condition 1: Purely numeric
+    const numericRegex = /^\d+$/;
+  
+    // Condition 2: Mixed with numeric
+    const mixedNumericRegex = /^\d/;
+  
+    // Check for Condition 1
+    if (numericRegex.test(text)) {
+      return false;
+    }
+  
+    // Check for Condition 2
+    if (mixedNumericRegex.test(text)) {
+      return false;
+    }
+  
+    // Condition 3: "acss123" is valid
+    return true;
+  };
+
+
 
 module.exports = router;
