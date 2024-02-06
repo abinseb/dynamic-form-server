@@ -34,6 +34,7 @@ router.post('/createForms', async (req, res) => {
                 listItems: data.listItems,
                 fileType: data.fileType,
                 required: data.required,
+                unique:data.unique,
                 foreignKey: parentForm._id // Set the foreign key to reference the ParentForm document
             });
 

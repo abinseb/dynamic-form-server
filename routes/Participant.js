@@ -21,7 +21,7 @@ router.post('/saveParticipant', upload.any(), async (req, res) => {
     try {
        
         const dynamicFields = JSON.parse(req.body.dynamicFields);
-        const participantdata = dynamicFields.participantdata;
+        const participantdata = dynamicFields.registration;
         const form_id = dynamicFields.form_id;
         // const form_id = req.body.dynamicFields.form_id;
         const files = req.files;
@@ -30,8 +30,9 @@ router.post('/saveParticipant', upload.any(), async (req, res) => {
          const childForms = await FetchtheWidgets(form_id);
         
         //  validate the data
-        validateTheFormData(participantdata,childForms);
+        await validateTheFormData(participantdata,childForms);
         // to create the object of the model and store these data to mongodb server
+       await  validateTheUniqueValues(participantdata,childForms,form_id)
         const newParticipantData = new Participant({
             
             dynamicFields:{
@@ -75,12 +76,38 @@ const FetchtheWidgets=async(form_id)=>{
         throw error
     }
 };
+// validate the data is unique or not
+const validateTheUniqueValues = async (participantdata, childforms,form_id) => {
+    for (const childform of childforms) {
+        const { name, unique } = childform;
+        if (unique) {
+            const registerData = participantdata.find(field => Object.keys(field)[0] === name);
+            if (registerData) {
+                const value = registerData[name];
+                try {
+                    const existingParticipant = await Participant.findOne({ 'dynamicFields.form_id':form_id, 'dynamicFields.userData': { $elemMatch: { [name]: value } } });
+                    if (existingParticipant) {
+                        throw new Error(`Duplicate value '${value}' found for field '${name}'.`);
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            }
+        }
+    }
+};
+
 
 // validate the formdata
 const validateTheFormData=(participantdata,childforms)=>{
     childforms.forEach((childform)=>{
         const {name,type} = childform;
-        const value = participantdata[name];
+        let value ;
+        const participantField = participantdata.find(field => Object.keys(field)[0] === name);
+        
+        if (participantField) {
+            value = participantField[name];
+        }
         console.log("$$$$$value",value,name);
 
     switch(type){

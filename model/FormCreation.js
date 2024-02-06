@@ -41,6 +41,10 @@ const formSchema = new mongoose.Schema(
             type:Boolean,
             require
         },
+        unique:{
+            type:Boolean,
+           
+        },
         foreignKey:{
             type:mongoose.Schema.Types.ObjectId,
             ref:'ParentForm'
