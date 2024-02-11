@@ -6,6 +6,18 @@ const parentFormSchema = new mongoose.Schema({
     formTitle:{
         type:String,
         require
+    },
+    formUrl:{
+        type:String,
+        require
+    },
+    userId:{
+        type:String,
+        require
+    },
+    stopResponse:{
+        type:Boolean,
+        require
     }
 })
 
@@ -48,7 +60,8 @@ const formSchema = new mongoose.Schema(
         foreignKey:{
             type:mongoose.Schema.Types.ObjectId,
             ref:'ParentForm'
-        }
+        },
+       
     }
 );
 // model foe the parent schema
