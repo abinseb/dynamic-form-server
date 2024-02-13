@@ -3,7 +3,8 @@ const router = express.Router();
 const Participant = require('../model/Participant');
 const multer = require('multer');
 const path = require('path'); // Add this line to include the 'path' module
-const {ChildForm} = require('../model/FormCreation');
+const {ChildForm, ParentForm} = require('../model/FormCreation');
+const authenticateToken = require('../midleware/authMidleware');
 // const authenticateToken = require('../midleware/authMidleware');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -23,6 +24,11 @@ router.post('/saveParticipant', upload.any(), async (req, res) => {
         const dynamicFields = JSON.parse(req.body.dynamicFields);
         const participantdata = dynamicFields.registration;
         const form_id = dynamicFields.form_id;
+        const userDataWithoutRequired = participantdata.map(data => {
+            const { required, ...userDataWithoutRequired } = data;
+            return userDataWithoutRequired;
+        });
+
         // const form_id = req.body.dynamicFields.form_id;
         const files = req.files;
      
@@ -32,11 +38,17 @@ router.post('/saveParticipant', upload.any(), async (req, res) => {
         //  validate the data
         await validateTheFormData(participantdata,childForms);
         // to create the object of the model and store these data to mongodb server
-       await  validateTheUniqueValues(participantdata,childForms,form_id)
+       await  validateTheUniqueValues(participantdata,childForms,form_id);
+    //    check the form is closed or not
+    const parentForm = await fetchTheParentFormData(form_id);
+    if(parentForm.stopResponse){
+        return res.status(403).json({error:'Registration is Closed'});
+    }
+
         const newParticipantData = new Participant({
             
             dynamicFields:{
-                userData:participantdata,
+                userData:userDataWithoutRequired,
                 form_id:form_id,
                 files: files.map(file=>({filename:file.filename , path:file.path}))
             }
@@ -63,7 +75,18 @@ router.post('/saveParticipant', upload.any(), async (req, res) => {
     }
 });
 
-
+// fetch the Parent form data 
+const fetchTheParentFormData =async(formid)=>{
+    try{
+        const parentForm = await ParentForm.findById(formid);
+        console.log('parent Form',parentForm);
+        return await parentForm;
+    }
+    catch(error){
+        console.log("Error",error);
+        throw error;
+    }
+}
 // fetch the widget data from the schema based on the form_id
 const FetchtheWidgets=async(form_id)=>{
     try{
@@ -170,6 +193,22 @@ const isValidText = (text) => {
     return true;
   };
 
+//   ______________________________get api for fetch the registerd users data______________
 
+
+router.get('/registration/:id',authenticateToken,async(req,res)=>{
+    try{
+        const formId = req.params.id;
+        const registration = await Participant.find({'dynamicFields.form_id':formId});
+        if(!registration){
+            res.status(404).json({message:'Not found'});
+        }
+        res.status(200).json(registration);
+    }
+    catch(error){
+        console.error(error);
+        res.status(504).json({error:'Internal Server Error'});
+    }
+})
 
 module.exports = router;

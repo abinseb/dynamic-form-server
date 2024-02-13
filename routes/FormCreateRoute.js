@@ -136,7 +136,7 @@ router.post('/updateform/:id',authenticateToken, async(req,res)=>{
             childForms.push(childForm);
         }
 
-        res.status(200).json({parentForm:existingParentForm,childForms,status:true,form_id:existingParentForm._id});
+        res.status(200).json({parentForm:existingParentForm,childForms,status:true,form_id:existingParentForm._id,message:'Updated'});
 
     }
     catch(error){
