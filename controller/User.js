@@ -1,35 +1,34 @@
-const express = require('express');
-const router = express.Router();
+
 const {User} = require('../model/User');
-const {validationResult, check ,body} = require('express-validator');
+
 const bycrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 
 // validation midleware
-const validateUserData =[
-    // Validate name, email and password
+// const validateUserData =[
+//     // Validate name, email and password
 
-    check('name').notEmpty().withMessage('Name is required'),
-    check('email').isEmail().withMessage('Invalid Email'),
-    check('mobile').isMobilePhone().withMessage('Invalid Mobile Number'),
-    check('password').isLength({min:5}).withMessage('Password must be at least 5 characters long'),
+//     check('name').notEmpty().withMessage('Name is required'),
+//     check('email').isEmail().withMessage('Invalid Email'),
+//     check('mobile').isMobilePhone().withMessage('Invalid Mobile Number'),
+//     check('password').isLength({min:5}).withMessage('Password must be at least 5 characters long'),
 
-    //  Custom sanitizer to trim whitespace from  email
-    body('email').trim().normalizeEmail(),
+//     //  Custom sanitizer to trim whitespace from  email
+//     body('email').trim().normalizeEmail(),
 
    
-        (req,res,next)=>{
-            const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        next();
-        }
-];
+//         (req,res,next)=>{
+//             const errors = validationResult(req);
+//         if (!errors.isEmpty()) {
+//             return res.status(400).json({ errors: errors.array() });
+//         }
+//         next();
+//         }
+// ];
 
 
-router.post('/userSignUp',validateUserData, async(req,res)=>{
+const userSignUp =  async(req,res)=>{
     try{
         const {name,email,mobile,password} = req.body; //register user data
 
@@ -57,10 +56,10 @@ router.post('/userSignUp',validateUserData, async(req,res)=>{
         console.error(error);
         res.status(500).json({error:'Internal Server Error'});
     }
-});
+};
 
 // user Login
-router.post('/userlogin',async(req,res)=>{
+const userLogin = async(req,res)=>{
     try{
         const {email,password} = req.body;
 
@@ -85,8 +84,11 @@ router.post('/userlogin',async(req,res)=>{
         console.error(error);
         res.status(500).json({error:'Internal Server Error'});
     }
-});
+};
 
 
 
-module.exports = router;
+module.exports = {
+    userSignUp,
+    userLogin
+};

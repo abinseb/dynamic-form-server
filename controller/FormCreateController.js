@@ -1,10 +1,10 @@
-const express = require('express');
-const router = express.Router();
+
+
 const { ParentForm, ChildForm } = require('../model/FormCreation');
-const authenticateToken = require('../midleware/authMidleware')
+
 
 // POST route to store multiple sets of form data
-router.post('/createForms', authenticateToken, async (req, res) => {
+const createForms =async (req, res) => {
     try {
         // Extract data from the request body
         const { formTitle,formUrl, formData } = req.body;
@@ -60,10 +60,10 @@ router.post('/createForms', authenticateToken, async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+};
 
 // get api for the created form
-router.get('/forms/:parentId', async (req, res) => {
+const getFormDataWithWidgets= async (req, res) => {
     try {
         // Get the parentId from the request parameters
         const { parentId } = req.params;
@@ -89,9 +89,9 @@ router.get('/forms/:parentId', async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+};
 
-router.post('/updateform/:id',authenticateToken, async(req,res)=>{
+const updateFormData = async(req,res)=>{
     try{
         // extract the data from the response body
         const {formTitle , formData} = req.body;
@@ -144,11 +144,11 @@ router.post('/updateform/:id',authenticateToken, async(req,res)=>{
         res.status(500).json({error:'Internal Server Error'});
     }
 
-});
+};
 
 // ______________________get api for the form details(Parentform) based on the userId____________
 
-router.get('/userformdata',authenticateToken,async(req,res)=>{
+const getFormDataBasedOnUserId = async(req,res)=>{
     try{
         const userId = req.userId;
         console.log("userid__",userId);
@@ -166,11 +166,11 @@ router.get('/userformdata',authenticateToken,async(req,res)=>{
         console.error(error);
         res.status(500).json({error:'Inernal Server Error'});
     }
-});
+};
 
 // ____________router for delete the child form
 
-router.delete('/deletechildform/:childformId',authenticateToken,async(req,res)=>{
+const deleteWidgets = async(req,res)=>{
     try{
         const childformId = req.params.childformId;
 
@@ -190,11 +190,11 @@ router.delete('/deletechildform/:childformId',authenticateToken,async(req,res)=>
         console.error(error);
         res.status(500).json({error:'Internal Server Error'});
     }
-});
+};
 
 // get api for geting Parent form data
 
-router.get('/parentFormdata/:id',authenticateToken,async(req,res)=>{
+const getFormdataBasedOnId = async(req,res)=>{
     try{
         const formId = req.params.id;
 
@@ -210,10 +210,10 @@ router.get('/parentFormdata/:id',authenticateToken,async(req,res)=>{
         console.error(error);
         res.status(500).json({error:error});
     }
-});
+};
 
 // api for updating the state stopResponse in the Parent forms
-router.put('/responseState/:id', authenticateToken, async (req, res) => {
+const responseStateUpdate =  async (req, res) => {
     try {
         const formid = req.params.id;
         const { stopResponse } = req.body;
@@ -235,10 +235,10 @@ router.put('/responseState/:id', authenticateToken, async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
-});
+};
 
 
-router.delete('/formdelete/:id',authenticateToken,async(req,res)=>{
+const deleteFormData_withWidgets = async(req,res)=>{
     try{
        const formid = req.params.id;
 
@@ -258,9 +258,15 @@ catch(error){
         console.error(error);
         res.status(500).json({error:'Internal Server Error'});
     }
-});
+};
 
-
-
-
-module.exports = router;
+module.exports = {
+    createForms,
+    getFormDataWithWidgets,
+    updateFormData,
+    getFormDataBasedOnUserId,
+    deleteWidgets,
+    getFormdataBasedOnId,
+    responseStateUpdate,
+    deleteFormData_withWidgets
+};

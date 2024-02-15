@@ -2,13 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
-
-const formRoute = require('./routes/FormCreateRoute'); //route for form data
-const participantsrouter = require('./routes/Participant'); //route for participants
-const userSignUp = require('./routes/User');
+// const passport = require('passport')
+const formRoute = require('./routes/FormRoutes'); //route for form data
+const registrationRoute = require('./routes/RegistrationRoutes'); //route for participants
+const userSignUp = require('./routes/UserRoutes');
 const app = express();
 app.use(express.json());
-
+const userLogin = require('./routes/auth')
+const passportset=require('./routes/passport')
 // use cors
 app.use(cors());
 
@@ -24,7 +25,9 @@ mongoose.connect(process.env.MONGODB_URI)
 // })
 // call the route 
 app.use("/",formRoute);
-app.use('/participant',participantsrouter);
+app.use('/participant',registrationRoute);
 app.use('/user',userSignUp);
+app.use('/auth',userLogin)
+
 app.listen(PORT, ()=>console.log('Server Connected',PORT));
 

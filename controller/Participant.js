@@ -1,24 +1,22 @@
-const express = require('express');
-const router = express.Router();
+
 const Participant = require('../model/Participant');
-const multer = require('multer');
-const path = require('path'); // Add this line to include the 'path' module
+
 const {ChildForm, ParentForm} = require('../model/FormCreation');
-const authenticateToken = require('../midleware/authMidleware');
+
 // const authenticateToken = require('../midleware/authMidleware');
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../upload')); // Use path.join to get the absolute path
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now()+'-'+Math.round(Math.random() *1e9);
-        cb(null, uniqueSuffix + file.originalname);
-    }
-});
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, path.join(__dirname, '../upload')); // Use path.join to get the absolute path
+//     },
+//     filename: function (req, file, cb) {
+//         const uniqueSuffix = Date.now()+'-'+Math.round(Math.random() *1e9);
+//         cb(null, uniqueSuffix + file.originalname);
+//     }
+// });
 
-const upload = multer({ storage:storage });
+// const upload = multer({ storage:storage });
 
-router.post('/saveParticipant', upload.any(), async (req, res) => {
+const saveParticipants= async (req, res) => {
     try {
        
         const dynamicFields = JSON.parse(req.body.dynamicFields);
@@ -73,7 +71,7 @@ router.post('/saveParticipant', upload.any(), async (req, res) => {
        }
       
     }
-});
+};
 
 // fetch the Parent form data 
 const fetchTheParentFormData =async(formid)=>{
@@ -196,7 +194,7 @@ const isValidText = (text) => {
 //   ______________________________get api for fetch the registerd users data______________
 
 
-router.get('/registration/:id',authenticateToken,async(req,res)=>{
+const fetchRegistration =  async(req,res)=>{
     try{
         const formId = req.params.id;
         const registration = await Participant.find({'dynamicFields.form_id':formId});
@@ -209,6 +207,9 @@ router.get('/registration/:id',authenticateToken,async(req,res)=>{
         console.error(error);
         res.status(504).json({error:'Internal Server Error'});
     }
-})
+}
 
-module.exports = router;
+module.exports = {
+    saveParticipants,
+    fetchRegistration
+};
