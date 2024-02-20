@@ -12,11 +12,15 @@ const userDataSchema = new mongoose.Schema({
     },
     mobile:{
         type:String,
-        require
+        
     },
     password:{
         type:String,
         require
+    },
+    googleId:{
+        type:String,
+        unique:true,
     }
 });
 

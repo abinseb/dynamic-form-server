@@ -1,12 +1,23 @@
 const router = require("express").Router();
 const passport = require("passport");
 
-const CLIENT_URL = "http://localhost:4000";
+const CLIENT_URL = "http://localhost:3000";
+
+
+router.get("/google", passport.authenticate("google", { scope: ["profile"] }));
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    successRedirect: `${CLIENT_URL}/home`,
+    failureRedirect: "/login/failed",
+  })
+);
 
 router.get("/login/success", (req, res) => {
   if (req.user) {
-    res.header('Access-Control-Allow-Origin', CLIENT_URL);
-    res.header('Access-Control-Allow-Credentials', 'true');
+    // res.header('Access-Control-Allow-Origin', CLIENT_URL);
+    // res.header('Access-Control-Allow-Credentials', 'true');
     res.status(200).json({
       success: true,
       message: "successful",
@@ -36,9 +47,9 @@ router.get("/login/failed", (req, res) => {
 // });
 
 router.get("/logout", (req, res) => {
-  req.session = null;
+  // req.session = null;
   req.logout();
-  res.redirect('/');
+  res.redirect(CLIENT_URL);
 })
 
 
@@ -59,15 +70,7 @@ router.get("/logout", (req, res) => {
 
 // });
 
-router.get("/google", passport.authenticate("google", { scope: ["profile"] }));
 
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    successRedirect: CLIENT_URL,
-    failureRedirect: "/",
-  })
-);
 
 // router. Get(
 //   "/googleLogin/callback",

@@ -1,87 +1,51 @@
-const express = require("express");
-const session = require("express-session");
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
-
-const mongoose = require("mongoose");
-
-const app = express();
+const passport  = require('passport');
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+const {User} = require('../model/User');
 
 
-
-app.use(session({
-  secret: 'your-secret-key',
-  resave: false,
-  saveUninitialized: false
-}));
-
-
-
-app.use(passport.initialize());
-app.use(passport.session());
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
-
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-
-const userSchema = new mongoose.Schema({
-  googleId: String,
-  githubId: String,
-  facebookId: String,
-  name: String,
-  photos: [{ value: String }],
- 
-});
-
-const User = mongoose.model("Googlesignup", userSchema);
-
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-      
-      callbackURL: "http://localhost:4000/auth/google/callback",
-
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        const existingUser = await User.findOne({ googleId: profile.id });
-
-        if (existingUser) {
-          return done(null, existingUser);
+passport.use(new GoogleStrategy({
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: "/auth/google/callback" // Corrected callback URL
+},
+async (accessToken, refreshToken, profile, done) => {
+    try {
+        console.log("profile",profile);
+        let user = await User.findOne({ googleId: profile.id });
+        if (!user) {
+            user = new User({
+                name: profile.displayName,
+                // email: profile.emails.value,
+                googleId: profile.id
+            });
+            await user.save();
         }
-
-        const newUser = new User({
-          googleId: profile.id,
-          name: profile.displayName,
-          photos: profile.photos,
-        });
-
-        await newUser.save();
-        done(null, newUser);
-      } catch (error) {
-        done(error);
-      }
+        // pass the user to the next middleware
+        done(null, user);
+    } catch (error) {
+        done(error, null);
     }
-  )
-);
+}));
 
-
-
+// Serialize user
 passport.serializeUser((user, done) => {
-  done(null, user);
+    done(null, user.id);
 });
 
-passport.deserializeUser((user, done) => {
-  done(null, user);
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (error) {
+        done(error, null);
+    }
 });
 
-module.exports = { GoogleUser: User };
-module.exports = { User };
+// module.exports = { GoogleUser: User };
+// module.exports = { User };
+
+
