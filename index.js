@@ -16,6 +16,9 @@ const session = require('express-session');
 const passport = require('passport');
 // const authRoutes = require('./routes/auth')
 // use cors
+
+const forgotpassword = require('./routes/forgot_pass_route'); //change the password 
+
 app.use(cors());
 
 const PORT = process.env.PORT || 4002 ;
@@ -46,6 +49,7 @@ app.use("/",formRoute); // routes for forms
 app.use('/participant',registrationRoute); // routes for created form registration
 app.use('/user',userSignUp); // sign up routes
 app.use('/auth',userLogin); //login routes
+app.use('/password',forgotpassword);
 
 app.listen(PORT, ()=>console.log('Server Connected',PORT));
 

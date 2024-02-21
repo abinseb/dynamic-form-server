@@ -77,7 +77,7 @@ const userLogin = async(req,res)=>{
 
         // Generate jwt token
         const token = jwt.sign({userId:user._id},'ict-dynamic-form',{expiresIn:'5h'});
-                res.status(200).json({token:token,message:'Login Success'});
+                res.status(200).json({token:token,message:'Login Success',name:user.name});
             
     }
     catch(error){
