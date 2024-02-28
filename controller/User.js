@@ -62,7 +62,7 @@ const userSignUp =  async(req,res)=>{
 const userLogin = async(req,res)=>{
     try{
         const {email,password} = req.body;
-
+        console.log(email);
         // find user by id
         const user = await User.findOne({email});
         if(!user){
@@ -76,7 +76,7 @@ const userLogin = async(req,res)=>{
         }
 
         // Generate jwt token
-        const token = jwt.sign({userId:user._id},'ict-dynamic-form',{expiresIn:'5h'});
+        const token = jwt.sign({userId:user._id},process.env.TOKEN_KEY,{expiresIn:'5h'});
                 res.status(200).json({token:token,message:'Login Success',name:user.name});
             
     }

@@ -8,7 +8,7 @@ const authenticateToken=(req,res,next)=>{
             return res.status(401).json({message:'Access denied'});
         }
 
-        jwt.verify(token,'ict-dynamic-form',(err,decoded)=>{
+        jwt.verify(token,process.env.TOKEN_KEY,(err,decoded)=>{
             if(err){
                 console.log("Error",err);
                 console.error("error",err);

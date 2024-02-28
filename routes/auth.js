@@ -12,11 +12,10 @@ router.get("/google", passport.authenticate("google", { scope: ["profile"] }));
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    successRedirect: `${CLIENT_URL}`,
+    successRedirect:`/auth/login/success`, 
     failureRedirect: "/login/failed",
   })
 );
-
 
 router.get("/login/success",async (req, res) => {
   if (req.user) {
@@ -27,14 +26,24 @@ router.get("/login/success",async (req, res) => {
     if(!user){
       return res.status(401).json({message:'Authentication Failed'});
     }
-    const token = jwt.sign({userId:user._id},'ict-dynamic-form',{expiresIn:'5h'});
-
-    res.status(200).json({
-      success: true,
-      message: "successful",
+    const token = jwt.sign({userId:user._id},process.env.TOKEN_KEY,{expiresIn:'5h'});
+    console.log("token",token);
+    const cookieData ={
       token:token,
-      user: req.user,
-    });
+      username:user.name
+    }
+    const cookieDataString = JSON.stringify(cookieData);
+
+    const domain = 'localhost';
+    const path = '/'
+    res.cookie('token',cookieDataString,{httpOnly:false , domain:domain ,path:path});
+    res.redirect(`${CLIENT_URL}/home/${token}`);
+    // res.status(200).json({
+    //   success: true,
+    //   message: "successful",
+    //   token:token,
+    //   user: req.user,
+    // });
   } 
   else {
     res.status(401).json({

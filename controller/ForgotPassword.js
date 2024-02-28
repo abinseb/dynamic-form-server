@@ -5,7 +5,7 @@ const bycrypt = require('bcrypt');
 
 const otpDB ={};
 
-const OTP_EXPIRY_TIME = 1 * 60 * 1000; // ONE MIUTE EXPIRY TIMESTAMPS
+const OTP_EXPIRY_TIME = 60 * 60 * 1000; // ONE MIUTE EXPIRY TIMESTAMPS
 
 
 const trasporter = nodemailer.createTransport({
@@ -20,6 +20,10 @@ const trasporter = nodemailer.createTransport({
 const forgotPassword =async(req,res)=>{
     try{
         const {email} = req.body;
+        const user = await User.findOne({email});
+        if(!user){
+            res.status(400).json({message:'Please enter registered email Id'});
+        }
 
         const otp = Math.floor(100000 + Math.random() * 900000);
 
@@ -36,11 +40,12 @@ const forgotPassword =async(req,res)=>{
         trasporter.sendMail(mailOptions,(error,info)=>{
             if(error){
                 console.log(error);
-                res.status(500).send('Error sending email');
+                res.status(500).json({message:'Error sending email'});
             }
             else{
                 console.log('Email sent :'+info.response );
-                res.send('OTP sent');
+                // res.send('OTP sent');
+                res.status(200).json({message:'Password reset OTP is sent to your email.'})
                 console.log('otp temp',otpDB[email]);
             }
         });
@@ -60,14 +65,15 @@ const verifyOTP =async(req,res)=>{
 
         if(otpDB[email] && otpDB[email].otp === otp){
             if(Date.now() > otpDB[email].expiry){
-                res.status(400).send('OTP expired');
+                res.status(400).json({error:'OTP Expired'});
             }
             else{
-                res.send('OTP Verified');
+                // res.send('OTP Verified');
+                res.status(200).json({message:'OTP Verified',status:true})
             }
         }
         else{
-            res.status(400).send('Invalid OTP')
+            res.status(400).json({error:'Invalid OTP'})
         }
     }
     catch(error){
