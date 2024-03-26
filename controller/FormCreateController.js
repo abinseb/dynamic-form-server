@@ -2,13 +2,17 @@
 
 const { ParentForm, ChildForm } = require('../model/FormCreation');
 
-
+const upload = require('../midleware/uploadTitleFile')
 // POST route to store multiple sets of form data
+// create the forms , with widgets these form and widgets are store in the different table
 const createForms =async (req, res) => {
     try {
         // Extract data from the request body
         const { formTitle,formUrl, formData } = req.body;
-       
+      
+        const formImage = req.file;
+        console.log("fileimageReq.body",formImage);
+       const formTitleImage = formImage ? formImage.filename : '';
         // extract the userid from token during auth midleware
         const userId = req.userId;
 
@@ -29,6 +33,8 @@ const createForms =async (req, res) => {
              formUrl:formUrl,
              userId:req.userId,
              stopResponse:false, 
+             status:'0',
+             formTitleImage:formTitleImage
             });
 
         // Create an array to store ChildForm documents
@@ -46,6 +52,7 @@ const createForms =async (req, res) => {
                 fileType: data.fileType,
                 required: data.required,
                 unique:data.unique,
+                fileSize:data.fileSize,
                 foreignKey: parentForm._id // Set the foreign key to reference the ParentForm document
             });
 
@@ -58,11 +65,11 @@ const createForms =async (req, res) => {
     } catch (error) {
         // Handle any errors
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: 'Internal controler Server Error' });
     }
 };
 
-// get api for the created form
+// get api for fetch the created form details with its corresponding widgets, 
 const getFormDataWithWidgets= async (req, res) => {
     try {
         // Get the parentId from the request parameters
@@ -79,11 +86,14 @@ const getFormDataWithWidgets= async (req, res) => {
         // Find all ChildForm documents related to the parent using the parentId
         const childForms = await ChildForm.find({ foreignKey: parentId });
         const formResponse = {
-                    form:parentForm,
+                    form:{
+                        ...parentForm.toJSON(),
+                        formTitleImageLink:parentForm.formTitleImage ? `http://192.168.122.1:4002/images/${parentForm.formTitleImage}` : null
+                    },
                     data:childForms
         }
         // Send a success response with both ParentForm and ChildForms
-        res.status(200).json({formResponse});
+        res.status(200).json({formResponse});                                                      
     } catch (error) {
         // Handle any errors
         console.error(error);
@@ -91,11 +101,15 @@ const getFormDataWithWidgets= async (req, res) => {
     }
 };
 
+// upadate the form data and its corresponding widgets
 const updateFormData = async(req,res)=>{
     try{
         // extract the data from the response body
         const {formTitle , formData} = req.body;
         const formId = req.params.id;
+        const formImage = req.file;
+        console.log("formimage",formImage);
+        const formTitleImage = formImage ? formImage.filename : '';
 
         console.log("formdata",formData);
         // Check if the form with the given id exists
@@ -107,6 +121,7 @@ const updateFormData = async(req,res)=>{
         // Update the form title if provided
         if(formTitle){
             existingParentForm.formTitle = formTitle;
+            existingParentForm.formTitleImage = formTitleImage;
             await existingParentForm.save();
         }
 
@@ -129,6 +144,7 @@ const updateFormData = async(req,res)=>{
                     fileType:data.fileType,
                     required:data.required,
                     unique:data.unique,
+                    fileSize:data.fileSize,
                     foreignKey:formId
                 });
                 await childForm.save();
@@ -146,13 +162,13 @@ const updateFormData = async(req,res)=>{
 
 };
 
-// ______________________get api for the form details(Parentform) based on the userId____________
+// ____get api for the form details(Parentform) based on the userId____________
 
 const getFormDataBasedOnUserId = async(req,res)=>{
     try{
         const userId = req.userId;
         console.log("userid__",userId);
-        const parentForm = await ParentForm.find({userId:userId});
+        const parentForm = await ParentForm.find({userId:userId , status:{$ne:'2'}});
 
         // if parent form is not found, send 404 response
         if(!parentForm){
@@ -212,6 +228,8 @@ const getFormdataBasedOnId = async(req,res)=>{
     }
 };
 
+
+
 // api for updating the state stopResponse in the Parent forms
 const responseStateUpdate =  async (req, res) => {
     try {
@@ -219,6 +237,13 @@ const responseStateUpdate =  async (req, res) => {
         const { stopResponse } = req.body;
         console.log("StopResponse:", stopResponse);
         console.log("Form ID:", formid);
+        let statusSate = null;
+        if(stopResponse === true){
+            statusSate = '1'
+        }
+        else{
+            statusSate = '0'
+        }
 
         const stateUpdate = await ParentForm.findById(formid);
         console.log("State Update:", stateUpdate);
@@ -226,8 +251,9 @@ const responseStateUpdate =  async (req, res) => {
         if (!stateUpdate) {
             return res.status(404).json({ message: 'Not Found' });
         }
-
+        console.log("Status state",statusSate);
         stateUpdate.stopResponse = stopResponse;
+        stateUpdate.status = statusSate;
         await stateUpdate.save();
 
         res.status(200).json({ message: 'Updated successfully' });
@@ -238,6 +264,7 @@ const responseStateUpdate =  async (req, res) => {
 };
 
 
+// delete the  form data with all widgets
 const deleteFormData_withWidgets = async(req,res)=>{
     try{
        const formid = req.params.id;
@@ -260,6 +287,25 @@ catch(error){
     }
 };
 
+// remove the form by change the status to 2
+const removeTheFormData =async(req,res)=>{
+    try{
+        const formId = req.params.id;
+        const formdata = await ParentForm.findById(formId);
+        if(!formdata){
+            return res.status(404).json({message:'Form not found'});
+        }
+        formdata.status = '2';
+        await formdata.save();
+        res.status(200).json({message:'Form Removed Successfully'});
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).json({error:'Internal Server Error'});
+    }
+}
+
+
 module.exports = {
     createForms,
     getFormDataWithWidgets,
@@ -268,5 +314,6 @@ module.exports = {
     deleteWidgets,
     getFormdataBasedOnId,
     responseStateUpdate,
-    deleteFormData_withWidgets
+    deleteFormData_withWidgets,
+    removeTheFormData
 };

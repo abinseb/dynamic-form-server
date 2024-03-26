@@ -16,6 +16,8 @@ const {ChildForm, ParentForm} = require('../model/FormCreation');
 
 // const upload = multer({ storage:storage });
 
+
+// this post api controler function is used to store the register data of the created forms
 const saveParticipants= async (req, res) => {
     try {
        
@@ -48,8 +50,9 @@ const saveParticipants= async (req, res) => {
             dynamicFields:{
                 userData:userDataWithoutRequired,
                 form_id:form_id,
-                files: files.map(file=>({filename:file.filename , path:file.path}))
-            }
+                files: files.map(file=>({[file.fieldname]:file.filename }))
+            },
+            formId:form_id,
 
         })
        
@@ -73,7 +76,7 @@ const saveParticipants= async (req, res) => {
     }
 };
 
-// fetch the Parent form data 
+// (get api)fetch the Parent form data , based on the formId fetch the corresponding parent form details
 const fetchTheParentFormData =async(formid)=>{
     try{
         const parentForm = await ParentForm.findById(formid);
@@ -85,7 +88,8 @@ const fetchTheParentFormData =async(formid)=>{
         throw error;
     }
 }
-// fetch the widget data from the schema based on the form_id
+// (get api)fetch the widget data from the schema based on the form_id, here we get the all widgets details
+// of the form
 const FetchtheWidgets=async(form_id)=>{
     try{
         const childform = await ChildForm.find({foreignKey:form_id});
@@ -119,7 +123,7 @@ const validateTheUniqueValues = async (participantdata, childforms,form_id) => {
 };
 
 
-// validate the formdata
+// validate the formdata email, mobile, text of the forms are validating , it is a validating function
 const validateTheFormData=(participantdata,childforms)=>{
     childforms.forEach((childform)=>{
         const {name,type} = childform;
@@ -193,7 +197,7 @@ const isValidText = (text) => {
 
 //   ______________________________get api for fetch the registerd users data______________
 
-
+// registration data of the dynamic form is get by using this controler function
 const fetchRegistration =  async(req,res)=>{
     try{
         const formId = req.params.id;
@@ -209,7 +213,28 @@ const fetchRegistration =  async(req,res)=>{
     }
 }
 
+// fetch the file  , the uploaded files of the dynamicaly created form is fetched by using
+// this controler function 
+const path = require('path');
+const fs = require('fs');
+const uploadDir  = path.join(__dirname,'../upload');
+
+const fetchFile =async(req,res)=>{
+    const filename = req.params.filename;
+
+    const filepath = path.join(uploadDir,filename);
+    fs.access(filepath,fs.constants.F_OK,err=>{
+        if(err){
+            return res.status(404).json({error:'File not found'})
+        }
+        res.sendFile(filepath);
+    })
+}
+
 module.exports = {
     saveParticipants,
-    fetchRegistration
+    fetchRegistration,
+    fetchFile
 };
+
+

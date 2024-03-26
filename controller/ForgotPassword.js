@@ -16,7 +16,8 @@ const trasporter = nodemailer.createTransport({
     }
 });
 
-
+// post api for forgot password, here send the otp for the inputed email.This function is use 
+// use the creating form users for resetting the password 
 const forgotPassword =async(req,res)=>{
     try{
         const {email} = req.body;
@@ -56,6 +57,7 @@ const forgotPassword =async(req,res)=>{
     }
 }
 
+// verify the otp , send to the email
 const verifyOTP =async(req,res)=>{
     try{
         const {email,otp} =  req.body;
@@ -81,6 +83,7 @@ const verifyOTP =async(req,res)=>{
     }
 }
 
+// this post api controler function is used to reset or update the old password to new
 const resetPassword =async(req,res)=>{
     try{
         const {email,newPassword} = req.body;

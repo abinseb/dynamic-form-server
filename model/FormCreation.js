@@ -12,14 +12,23 @@ const parentFormSchema = new mongoose.Schema({
         require
     },
     userId:{
-        type:String,
-        require
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
     },
     stopResponse:{
         type:Boolean,
         require
+    },
+    status:{
+        type:String,
+        require
+    },
+    formTitleImage:{
+        type:String
+        
     }
-})
+    
+},{timestamps:true})
 
 // child schema
 const formSchema = new mongoose.Schema(
@@ -57,12 +66,17 @@ const formSchema = new mongoose.Schema(
             type:Boolean,
            
         },
+        fileSize:{
+            type:String,
+           
+        },
         foreignKey:{
             type:mongoose.Schema.Types.ObjectId,
             ref:'ParentForm'
         },
        
     }
+    ,{timestamps:true}
 );
 // model foe the parent schema
 const ParentForm = mongoose.model("ParentForm",parentFormSchema);

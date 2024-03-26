@@ -27,13 +27,13 @@ const jwt = require('jsonwebtoken');
 //         }
 // ];
 
-
+// form creating user sign up (post api)
 const userSignUp =  async(req,res)=>{
     try{
         const {name,email,mobile,password} = req.body; //register user data
-
+            console.log("req-",req.body);
         // Check if  user with the same email already exists
-        let user = await User.findOne({email,mobile});
+        let user = await User.findOne({ $or: [{ "email": email }, { "mobile": mobile }] });
         if(user){
             return res.status(400).json({ message: 'User already exists' });
         }
@@ -58,7 +58,7 @@ const userSignUp =  async(req,res)=>{
     }
 };
 
-// user Login
+// user Login , login the user with  email and password (post api)
 const userLogin = async(req,res)=>{
     try{
         const {email,password} = req.body;
