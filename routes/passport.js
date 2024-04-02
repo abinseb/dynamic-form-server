@@ -10,16 +10,20 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback" // Corrected callback URL
+    callbackURL: "/auth/google/callback", // Corrected callback URL
+    // profileFields: ['id', 'displayName', 'emails'] 
+    scope: ['profile', 'email'] 
 },
 async (accessToken, refreshToken, profile, done) => {
     try {
         console.log("profile",profile);
         let user = await User.findOne({ googleId: profile.id });
+        const email = profile.emails[0].value;
+        console.log("usr signup email ----" , email);
         if (!user) {
             user = new User({
                 name: profile.displayName,
-                // email: profile.emails.value,
+                email: email,
                 googleId: profile.id
             });
             await user.save();

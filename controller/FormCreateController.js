@@ -18,7 +18,7 @@ const createForms =async (req, res) => {
 
         console.log("userid,",formTitle,userId);
 
-        const existingParentForm = await ParentForm.findOne({formTitle});
+        const existingParentForm = await ParentForm.findOne({formTitle,userId});
 
 
         if (existingParentForm) {
@@ -88,7 +88,7 @@ const getFormDataWithWidgets= async (req, res) => {
         const formResponse = {
                     form:{
                         ...parentForm.toJSON(),
-                        formTitleImageLink:parentForm.formTitleImage ? `http://192.168.122.1:4002/images/${parentForm.formTitleImage}` : null
+                        formTitleImageLink:parentForm.formTitleImage ? `http://192.168.1.117:4002/images/${parentForm.formTitleImage}` : null
                     },
                     data:childForms
         }
@@ -110,7 +110,7 @@ const updateFormData = async(req,res)=>{
         const formImage = req.file;
         console.log("formimage",formImage);
         const formTitleImage = formImage ? formImage.filename : '';
-
+        const userId = req.userId;
         console.log("formdata",formData);
         // Check if the form with the given id exists
         const existingParentForm = await ParentForm.findById(formId);
@@ -118,10 +118,20 @@ const updateFormData = async(req,res)=>{
             return res.status(404).json({message:'Form not found'});
         }
 
+        const existingParentforms =  await ParentForm.findOne({
+            formTitle,
+            userId,
+            _id:{$ne:formId}
+        })
+        if(existingParentforms){
+            return res.status(404).json({message:'Form title is already exist in another form'});
+        }
         // Update the form title if provided
         if(formTitle){
             existingParentForm.formTitle = formTitle;
-            existingParentForm.formTitleImage = formTitleImage;
+            if(formImage){
+                existingParentForm.formTitleImage = formTitleImage;
+            }
             await existingParentForm.save();
         }
 
