@@ -17,7 +17,8 @@ const passportset=require('./routes/passport');
 
 const forgotpassword = require('./routes/forgot_pass_route'); //change the password 
 const superadminRoutes = require('./routes/SuperAdmin');
-
+// project routes
+const projectRoute = require('./routes/Project')
 
 // call express and cors
 const app = express();
@@ -58,6 +59,7 @@ app.use('/user',userSignUp); // sign up routes
 app.use('/auth',userLogin); //login routes
 app.use('/password',forgotpassword);
 app.use('/superAdmin',superadminRoutes);
+app.use('/project',projectRoute);
 
 // hosting for routing
 // app.get("*", function (req, res) {
