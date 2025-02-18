@@ -15,7 +15,7 @@ router.get('/forms/:parentId', formController. getFormDataWithWidgets);
 router.post('/updateform/:id', authenticateToken,uploadFileMiddleware.single('formTitleImage'), formController.updateFormData);
 
 // fetch the dynamicaly created forms data(parent form data) of the user(based on the userId)
-router.get('/userformdata',authenticateToken, formController.getFormDataBasedOnUserId);
+router.post('/userformdata',authenticateToken, formController.getFormDataBasedOnUserId);
 
 // this api is used to delete the widgets of the form
 router.delete('/deletechildform/:childformId', authenticateToken, formController.deleteWidgets);

@@ -8,17 +8,14 @@ const upload = require('../midleware/uploadTitleFile')
 const createForms =async (req, res) => {
     try {
         // Extract data from the request body
-        const { formTitle,formUrl, formData } = req.body;
+        const { formTitle,formUrl, formData,projectId } = req.body;
       
         const formImage = req.file;
         console.log("fileimageReq.body",formImage);
        const formTitleImage = formImage ? formImage.filename : '';
         // extract the userid from token during auth midleware
-        const userId = req.userId;
-
-        console.log("userid,",formTitle,userId);
-
-        const existingParentForm = await ParentForm.findOne({formTitle,userId});
+        console.log("project id",projectId);
+        const existingParentForm = await ParentForm.findOne({formTitle,projectId});
 
 
         if (existingParentForm) {
@@ -34,7 +31,8 @@ const createForms =async (req, res) => {
              userId:req.userId,
              stopResponse:false, 
              status:'0',
-             formTitleImage:formTitleImage
+             formTitleImage:formTitleImage,
+             projectId:projectId
             });
 
         // Create an array to store ChildForm documents
@@ -177,8 +175,8 @@ const updateFormData = async(req,res)=>{
 const getFormDataBasedOnUserId = async(req,res)=>{
     try{
         const userId = req.userId;
-        console.log("userid__",userId);
-        const parentForm = await ParentForm.find({userId:userId , status:{$ne:'2'}});
+        const {projectId} = req.body;
+        const parentForm = await ParentForm.find({userId:userId,projectId:projectId , status:{$ne:'2'}});
 
         // if parent form is not found, send 404 response
         if(!parentForm){

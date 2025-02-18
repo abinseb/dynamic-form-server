@@ -34,7 +34,23 @@ const createProject = async(req, res)=>{
     }
 }
 
+
+// fetch all projects
+const fetchAllProjects =  async(req,res)=>{
+    try{
+        const projects = await Project.find().sort({createdAt:-1});
+        if(!projects || projects.length === 0){
+            return res.status(404).json({message:'No Project Found'});
+        }
+        res.status(200).json({projects});
+    }
+    catch(error){
+        res.status(500).json({message:'Internal Server Error'});
+    }
+}
+
 module.exports = {
     createProject,
+    fetchAllProjects,
     validateProject
 };
