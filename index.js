@@ -27,7 +27,7 @@ app.use(cors());
 
 // for hosting call the build file
 // hosting
-// app.use(express.static(path.join(__dirname, 'build'))) 
+app.use(express.static(path.join(__dirname, 'build'))) 
 
 const PORT = process.env.PORT || 4002 ;
 
@@ -62,9 +62,9 @@ app.use('/superAdmin',superadminRoutes);
 app.use('/project',projectRoute);
 
 // hosting for routing
-// app.get("*", function (req, res) {
-//   res.sendFile(path.join(__dirname, "./build/index.html"));
-// })
+app.get("*", function (req, res) {
+  res.sendFile(path.join(__dirname, "./build/index.html"));
+})
 
 app.listen(PORT, ()=>console.log('Server Connected',PORT));
 

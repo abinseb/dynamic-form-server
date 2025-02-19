@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/static/css/main.3b662836.css",
+    "main.js": "/static/js/main.d7ffbdb9.js",
+    "static/js/239.34038763.chunk.js": "/static/js/239.34038763.chunk.js",
+    "static/js/213.79281ff1.chunk.js": "/static/js/213.79281ff1.chunk.js",
+    "static/js/63.a616521b.chunk.js": "/static/js/63.a616521b.chunk.js",
+    "static/js/453.09bdcc69.chunk.js": "/static/js/453.09bdcc69.chunk.js",
+    "static/media/img2.png": "/static/media/img2.85cb67dd7c3ded93dd03.png",
+    "static/media/LOGO_ICTAK-ENG-ALT-White-Text.png": "/static/media/LOGO_ICTAK-ENG-ALT-White-Text.d289fd43a472752fc777.png",
+    "static/media/google.png": "/static/media/google.e12914ad8afda3f6f2e8.png",
+    "static/media/user2.png": "/static/media/user2.a6143582309785dca610.png",
+    "index.html": "/index.html",
+    "main.3b662836.css.map": "/static/css/main.3b662836.css.map",
+    "main.d7ffbdb9.js.map": "/static/js/main.d7ffbdb9.js.map",
+    "239.34038763.chunk.js.map": "/static/js/239.34038763.chunk.js.map",
+    "213.79281ff1.chunk.js.map": "/static/js/213.79281ff1.chunk.js.map",
+    "63.a616521b.chunk.js.map": "/static/js/63.a616521b.chunk.js.map",
+    "453.09bdcc69.chunk.js.map": "/static/js/453.09bdcc69.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3b662836.css",
+    "static/js/main.d7ffbdb9.js"
+  ]
+}
