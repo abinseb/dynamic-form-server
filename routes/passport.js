@@ -10,7 +10,7 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback", // Corrected callback URL
+    callbackURL: "https://forms.ictkerala.org/auth/google/callback", // Corrected callback URL
     // profileFields: ['id', 'displayName', 'emails'] 
     scope: ['profile', 'email'] 
 },
