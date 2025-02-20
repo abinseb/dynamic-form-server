@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const { User }  = require('../model/User');
 
 
+const CLIENT_URL = "https://forms.ictkerala.org/";
+
 
 router.get("/google", passport.authenticate("google",{scope:['profile','email']}));
 
@@ -17,7 +19,8 @@ router.get(
 
 router.get("/login/success",async (req, res) => {
   if (req.user) {
-   
+    // res.header('Access-Control-Allow-Origin', CLIENT_URL);
+    // res.header('Access-Control-Allow-Credentials', 'true');
     console.log("userrss_____",req.user);
     const user = await User.findOne({googleId:req.user.googleId });
     if(!user){
@@ -25,20 +28,12 @@ router.get("/login/success",async (req, res) => {
     }
     const token = jwt.sign({userId:user._id},process.env.TOKEN_KEY,{expiresIn:'5h'});
     console.log("token",token);
-    
-
-
-    const domain = 'localhost';
+     const domain = 'https://forms.ictkerala.org';
     const path = '/'
     res.cookie('token',token,{httpOnly:false , domain:domain ,path:path});
     res.cookie('username',user.name,{httpOnly:false , domain:domain ,path:path});
     res.redirect(`/project`);
-    // res.status(200).json({
-    //   success: true,
-    //   message: "successful",
-    //   token:token,
-    //   user: req.user,
-    // });
+   
   } 
   else {
     res.status(401).json({
@@ -58,7 +53,7 @@ router.get("/login/failed", (req, res) => {
 router.get("/logout", (req, res) => {
   // req.session = null;
   req.logout();
-  res.redirect('/');
+  res.redirect(CLIENT_URL);
 })
 
 
