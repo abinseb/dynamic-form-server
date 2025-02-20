@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { User }  = require('../model/User');
 
 
-const CLIENT_URL = "https://forms.ictkerala.org/";
+const CLIENT_URL = "https://forms.ictkerala.org";
 
 
 router.get("/google", passport.authenticate("google",{scope:['profile','email']}));
