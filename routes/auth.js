@@ -4,8 +4,6 @@ const jwt = require('jsonwebtoken');
 const { User }  = require('../model/User');
 
 
-const CLIENT_URL = "http://localhost:3000";
-
 
 router.get("/google", passport.authenticate("google",{scope:['profile','email']}));
 
@@ -19,8 +17,7 @@ router.get(
 
 router.get("/login/success",async (req, res) => {
   if (req.user) {
-    // res.header('Access-Control-Allow-Origin', CLIENT_URL);
-    // res.header('Access-Control-Allow-Credentials', 'true');
+   
     console.log("userrss_____",req.user);
     const user = await User.findOne({googleId:req.user.googleId });
     if(!user){
@@ -28,16 +25,14 @@ router.get("/login/success",async (req, res) => {
     }
     const token = jwt.sign({userId:user._id},process.env.TOKEN_KEY,{expiresIn:'5h'});
     console.log("token",token);
-    const cookieData ={
-      token:token,
-      username:user.name
-    }
-    const cookieDataString = JSON.stringify(cookieData);
+    
+
 
     const domain = 'localhost';
     const path = '/'
-    res.cookie('token',cookieDataString,{httpOnly:false , domain:domain ,path:path});
-    res.redirect(`${CLIENT_URL}/home/${token}`);
+    res.cookie('token',token,{httpOnly:false , domain:domain ,path:path});
+    res.cookie('username',user.name,{httpOnly:false , domain:domain ,path:path});
+    res.redirect(`/project`);
     // res.status(200).json({
     //   success: true,
     //   message: "successful",
@@ -63,7 +58,7 @@ router.get("/login/failed", (req, res) => {
 router.get("/logout", (req, res) => {
   // req.session = null;
   req.logout();
-  res.redirect(CLIENT_URL);
+  res.redirect('/');
 })
 
 
